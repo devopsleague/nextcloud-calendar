@@ -26,15 +26,18 @@
 		:title="calendar.displayName || $t('calendar', 'Untitled calendar')"
 		:class="{deleted: !!deleteTimeout, disabled: !calendar.enabled, 'open-sharing': shareMenuOpen}"
 		@click.prevent.stop="toggleEnabled">
-		<AppNavigationIconBullet
-			v-if="calendar.enabled"
-			slot="icon"
-			:color="calendar.color"
-			@click.prevent.stop="toggleEnabled" />
-		<AppNavigationDisabledCalendarIconBullet
-			v-if="!calendar.enabled"
-			slot="icon"
-			@click.prevent.stop="toggleEnabled" />
+		<template slot="icon">
+			<Actions>
+				<ActionButton @click.prevent.stop="toggleEnabled">
+					<template #icon>
+						<CheckboxBlankCircle
+							:title="isCalendarEnabled ? $t('calendar', 'Disable calendar') : $t('calendar', 'Enable calendar') "
+							:size="20"
+							:fill-color="calendar.enabled ? calendar.color : 'var(--color-text-lighter)'" />
+					</template>
+				</ActionButton>
+			</Actions>
+		</template>
 
 		<template v-if="!deleteTimeout" slot="counter">
 			<Actions v-if="showSharingIcon" class="sharing">
@@ -171,7 +174,6 @@ import ActionButton from '@nextcloud/vue/dist/Components/ActionButton'
 import ActionInput from '@nextcloud/vue/dist/Components/ActionInput'
 import ActionLink from '@nextcloud/vue/dist/Components/ActionLink'
 import ActionText from '@nextcloud/vue/dist/Components/ActionText'
-import AppNavigationIconBullet from '@nextcloud/vue/dist/Components/AppNavigationIconBullet'
 import AppNavigationItem from '@nextcloud/vue/dist/Components/AppNavigationItem'
 import ClickOutside from 'vue-click-outside'
 import {
@@ -183,7 +185,6 @@ import {
 	generateRemoteUrl,
 } from '@nextcloud/router'
 
-import AppNavigationDisabledCalendarIconBullet from './AppNavigationDisabledCalendarIconBullet.vue'
 import CalendarListItemSharingSearch from './CalendarListItemSharingSearch.vue'
 import CalendarListItemSharingPublishItem from './CalendarListItemSharingPublishItem.vue'
 import CalendarListItemSharingShareItem from './CalendarListItemSharingShareItem.vue'
@@ -195,6 +196,7 @@ import LinkVariant from 'vue-material-design-icons/LinkVariant.vue'
 import Pencil from 'vue-material-design-icons/Pencil.vue'
 import ShareVariant from 'vue-material-design-icons/ShareVariant.vue'
 import Undo from 'vue-material-design-icons/Undo.vue'
+import CheckboxBlankCircle from 'vue-material-design-icons/CheckboxBlankCircle.vue'
 
 export default {
 	name: 'CalendarListItem',
@@ -205,8 +207,7 @@ export default {
 		ActionInput,
 		ActionLink,
 		ActionText,
-		AppNavigationDisabledCalendarIconBullet,
-		AppNavigationIconBullet,
+	  CheckboxBlankCircle,
 		AppNavigationItem,
 		CalendarListItemSharingSearch,
 		CalendarListItemSharingPublishItem,
@@ -333,6 +334,14 @@ export default {
 			}
 
 			return ''
+		},
+	  /**
+	   * Is the calendar enabled
+	   *
+	   * @return {boolean}
+	   */
+	  isCalendarEnabled() {
+			return this.$store.state.calendars.calendarsById[this.calendar.id].enabled
 		},
 	},
 	methods: {
